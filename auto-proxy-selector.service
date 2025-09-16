@@ -1,0 +1,15 @@
+[Unit]
+Description=Auto Proxy Selector Script
+After=network.target
+
+[Service]
+Type=simple
+User=your_username # 请替换为你的实际 Ubuntu 用户名
+WorkingDirectory=/home/your_username/auto-proxy-manager # 请替换为你的实际路径
+Environment=PATH=/home/your_username/auto-proxy-manager/venv/bin # 如果使用虚拟环境
+ExecStart=/home/your_username/auto-proxy-manager/venv/bin/python proxy_selector.py # 如果使用虚拟环境
+# ExecStart=/usr/bin/python3 /home/your_username/auto-proxy-manager/proxy_selector.py # 如果不使用虚拟环境
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
