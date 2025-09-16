@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>自动代理选择器</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>自动代理选择器</h1>
+    <button id="refresh-btn">刷新数据</button>
+    <p><strong>最后更新时间:</strong> <span id="update-time">加载中...</span></p>
+    <p><strong>当前最优代理:</strong> <span id="best-proxy">加载中...</span></p>
+    
+    <h2>代理列表</h2>
+    <table id="proxy-table">
+        <thead>
+            <tr>
+                <th>代理地址</th>
+                <th>状态</th>
+                <th>延迟 (ms)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- 数据将通过 JS 动态填充 -->
+        </tbody>
+    </table>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
+
+
+
