@@ -1,0 +1,17 @@
+[Unit]
+Description=Auto Proxy Selector Service
+After=network.target
+
+[Service]
+Type=simple
+User=your_username # TODO: 替换为运行服务的用户
+WorkingDirectory=/home/your_username/auto-proxy-manager # TODO: 替换为你的项目实际路径
+ExecStart=/usr/bin/python3 /home/your_username/auto-proxy-manager/proxy_selector.py # TODO: 替换为你的 proxy_selector.py 实际路径
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+
+
+
