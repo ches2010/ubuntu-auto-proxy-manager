@@ -3,9 +3,8 @@
 import requests
 import time
 import json
-import threading
-import os
 import sys
+import os
 
 # --- 配置 ---
 PROXY_LIST_FILE = "proxies.json"  # 代理列表文件
@@ -22,6 +21,14 @@ def load_proxy_list():
     """从 JSON 文件加载代理列表"""
     global PROXY_LIST
     try:
+        if not os.path.exists(PROXY_LIST_FILE):
+             print(f"警告: 找不到代理列表文件 '{PROXY_LIST_FILE}'。将创建一个空列表。")
+             PROXY_LIST = []
+             # 创建一个空文件
+             with open(PROXY_LIST_FILE, 'w') as f:
+                 json.dump(PROXY_LIST, f, indent=4)
+             return True
+
         with open(PROXY_LIST_FILE, 'r') as f:
             PROXY_LIST = json.load(f)
         if not isinstance(PROXY_LIST, list):
@@ -29,7 +36,7 @@ def load_proxy_list():
         print(f"成功从 {PROXY_LIST_FILE} 加载了 {len(PROXY_LIST)} 个代理。")
         return True # 表示加载成功
     except FileNotFoundError:
-        print(f"错误: 找不到代理列表文件 '{PROXY_LIST_FILE}'。请确保文件存在于脚本同目录下。")
+        print(f"错误: 找不到代理列表文件 '{PROXY_LIST_FILE}'。")
         return False
     except json.JSONDecodeError as e:
         print(f"错误: '{PROXY_LIST_FILE}' 文件格式不正确 (JSON 解析错误): {e}")
@@ -54,7 +61,7 @@ def test_proxy(proxy_url):
         response = requests.get(TEST_URL, proxies=proxies, timeout=TIMEOUT)
         end_time = time.time()
         delay_ms = int((end_time - start_time) * 1000)
-        
+
         # 检查响应状态码和内容
         if response.status_code == 204 and len(response.content) == 0:
              return {
@@ -98,10 +105,10 @@ def test_proxy(proxy_url):
 def select_best_proxy(results):
     """从测试结果中选择延迟最低的成功代理"""
     successful_proxies = [r for r in results if r['status'] == 'success' and r['delay'] is not None and r['delay'] <= MAX_DELAY_MS]
-    
+
     if not successful_proxies:
         return None
-        
+
     # 按延迟排序，取第一个
     best_proxy = min(successful_proxies, key=lambda x: x['delay'])
     return best_proxy
@@ -121,21 +128,21 @@ def run_tests():
         results = []
         # 为了简化和避免对代理服务器造成过大压力，这里使用串行测试。
         # 对于大量代理或需要更快测试周期的场景，可以考虑并发（如使用 concurrent.futures.ThreadPoolExecutor）。
-        for proxy in PROXY_LIST: 
+        for proxy in PROXY_LIST:
              result = test_proxy(proxy)
              results.append(result)
              # 可选：打印每个代理的测试结果
              # print(f"  - {proxy}: {result['status']} (延迟: {result['delay']}ms)")
-        
+
         best_proxy = select_best_proxy(results)
-        
+
         # 准备写入文件的数据
         status_data = {
             "last_update": time.strftime('%Y-%m-%d %H:%M:%S'),
             "best_proxy": best_proxy,
             "all_results": results # 可选：保存所有结果供调试
         }
-        
+
         # 写入文件
         try:
             with open(STATUS_FILE, 'w') as f:
@@ -143,7 +150,7 @@ def run_tests():
             print(f"  -> 最优代理: {best_proxy['url'] if best_proxy else 'None (无可用代理)'}")
         except Exception as e:
             print(f"  -> 写入状态文件 '{STATUS_FILE}' 失败: {e}")
-            
+
         print(f"等待 {TEST_INTERVAL} 秒后进行下一次测试...")
         time.sleep(TEST_INTERVAL)
 
